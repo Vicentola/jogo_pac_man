@@ -9,6 +9,15 @@ estado = 'Inicio'
 
 jogador = None
 
+def inicializar():
+    glEnable(GL_DEPTH_TEST) #teste de profundidade vendo quais objetos estao na frente e atraz
+
+    glMatrixMode(GL_PROJECTION)#matriz de proporcao configura lente e camera
+    glLoadIdentity() #rezeta a matriz pra n carregar funcoes anteriores
+    gluPerspective(60, width / height, 0.1, 100)
+
+    glMatrixMode(GL_MODELVIEW)    
+
 def draw():
     
     
@@ -21,10 +30,36 @@ def draw():
     elif estado == 'GameOver':
         glClearColor(0.5, 0, 0, 1)
     
+   
+    
     
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
+    glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
+    
+    gluLookAt(
+        4.5, 12, 10,  # posição da câmera
+        4.5, 0, 3.5,  # alvo: centro do mapa
+        0, 1, 0       # direção para cima
+        )    
+    
+    if estado == 'Jogando' or estado == 'Pause':
+    
+        glColor3f(0, 0, 1)
+    
+        for y, linha in enumerate(mapa):
+            for x, caractere in enumerate(linha):
+
+                if caractere == '#':
+                    glPushMatrix() # salva a matriz atua
+
+                    glTranslatef(x, 0, y) # desloca o sistema de coordenadas
+                    glutSolidCube(1) # desenha o cubo
+
+                    glPopMatrix() # restaura a matriz salva
+
+    
     glutSwapBuffers() # importante para doubl;e buffering
     
 def carregar_mapa():
@@ -80,6 +115,9 @@ glutInitDisplayMode(GLUT_RGB| GLUT_DOUBLE | GLUT_DEPTH )
 glutInitWindowSize(width, height)
 glutInitWindowPosition(200,200)
 janela = glutCreateWindow(b'pac-man')
+
+inicializar()
+
 glutDisplayFunc(draw)
 
 glutTimerFunc(16, timer, 0)
