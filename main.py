@@ -58,6 +58,19 @@ def draw():
                     glutSolidCube(1) # desenha o cubo
 
                     glPopMatrix() # restaura a matriz salva
+        
+        glColor3f(1,1,0)
+        
+        jx = jogador[0]
+        jy = jogador[1]
+        
+        glPushMatrix()
+        
+        glTranslate(jx, 0, jy)
+        
+        glutSolidSphere(0.4,20,20)
+        
+        glPopMatrix()
 
     
     glutSwapBuffers() # importante para doubl;e buffering
@@ -106,6 +119,31 @@ def teclado(key, x, y):
             estado = 'Inicio'
     if key == b'\x1b':
         glutLeaveMainLoop()
+        
+        
+def teclas_especiais(key, x, y):
+    global jogador
+
+    if estado == 'Jogando':
+
+        jx, jy = jogador
+
+        nx, ny = jx, jy
+
+        if key == GLUT_KEY_UP:
+            ny -= 1
+
+        if key == GLUT_KEY_DOWN:
+            ny += 1
+
+        if key == GLUT_KEY_LEFT:
+            nx -= 1
+
+        if key == GLUT_KEY_RIGHT:
+            nx += 1
+
+        if mapa[ny][nx] != '#':
+            jogador = (nx, ny)
     
 
     
@@ -122,6 +160,7 @@ glutDisplayFunc(draw)
 
 glutTimerFunc(16, timer, 0)
 glutKeyboardFunc(teclado)
+glutSpecialFunc(teclas_especiais)
 carregar_mapa()
 glutMainLoop()
 
