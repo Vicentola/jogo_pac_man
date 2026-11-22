@@ -20,6 +20,8 @@ inicio_jogador = None
 
 vidas  = 3
 
+modo_camera = 'cima'
+
 DIRECOES = [(1,0), (-1,0), (0,1), (0,-1)]
 
 def inicializar():
@@ -57,11 +59,22 @@ def draw():
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
-    gluLookAt(
-        4.5, 12, 10,  # posição da câmera
-        4.5, 0, 3.5,  # alvo: centro do mapa
-        0, 1, 0       # direção para cima
-        )    
+    if modo_camera == 'cima':
+        gluLookAt(
+            4.5, 12, 10,  # posição da câmera
+            4.5, 0, 3.5,  # alvo: centro do mapa
+            0, 1, 0       # direção para cima
+            )
+    else:
+        jx, jy = jogador
+
+        gluLookAt(
+            jx, 4, jy + 4,
+            jx, 0, jy,
+            0, 1, 0
+            )
+        
+            
     
     if estado == 'Jogando' or estado == 'Pause':
         
@@ -275,7 +288,7 @@ def timer(valor):
     glutTimerFunc(16, timer, 0)
     
 def teclado(key, x, y):
-    global estado, vidas, pontos
+    global estado, vidas, pontos, modo_camera
     if estado == 'Inicio':
         if key == b'\r':
             estado = 'Jogando'
@@ -299,6 +312,13 @@ def teclado(key, x, y):
             vidas = 3
             pontos = 0
             carregar_mapa()
+    
+    
+    if key == b'c':
+        if modo_camera == 'cima':
+            modo_camera = 'seguir'
+        else:
+            modo_camera = 'cima'
             
     if key == b'\x1b':
         glutLeaveMainLoop()
