@@ -13,6 +13,12 @@ jogador = None
 
 contador = 0
 
+pontos = 0
+
+inicio_jogador = None
+
+vidas  = 3
+
 DIRECOES = [(1,0), (-1,0), (0,1), (0,-1)]
 
 def inicializar():
@@ -35,6 +41,8 @@ def draw():
         glClearColor(0, 0, 0.4, 1)
     elif estado == 'GameOver':
         glClearColor(0.5, 0, 0, 1)
+    elif estado == 'Vitoria':
+        glClearColor(0, 0.4, 0, 1)
     
    
     
@@ -93,6 +101,20 @@ def draw():
             glutSolidCube(0.7)
             
             glPopMatrix()
+            
+        for moeda in moedas:
+            
+            glColor3f(1, 1, 1)
+            
+            fx = moeda[0]
+            fy = moeda[1]
+            
+            glPushMatrix()
+            glTranslate(fx,0,fy)
+            
+            glutSolidSphere(0.1,10,10)
+            
+            glPopMatrix()
         
         
         
@@ -134,10 +156,24 @@ def mover_fantasmas():
             # Atualizar posição
             fantasma[0] += ndx
             fantasma[1] += ndy
+            
+            
+
+def checar_colisao_fantasma():
+    global jogador, vidas, estado
+    
+    for fantasma in inimigos:
+        if (fantasma[0],fantasma[1]) == jogador:
+            vidas -=1
+            if vidas <= 0:
+                estado = 'GameOver'
+            jogador = inicio_jogador
+            print(vidas)
+            
 
     
 def carregar_mapa():
-    global mapa, jogador, inimigos, moedas
+    global mapa, jogador, inimigos, moedas, inicio_jogador
     mapa = []
     inimigos = []
     moedas = []
@@ -151,6 +187,7 @@ def carregar_mapa():
             for x, caractere in enumerate(linha):
                 if caractere == 'P':
                     jogador = (x,y)
+                    inicio_jogador = (x,y)
                 elif caractere == 'E':
                     inimigos.append([x,y,1,0])
                 elif caractere == '.':
@@ -161,44 +198,61 @@ def carregar_mapa():
     
 def timer(valor):
     
-    global contador
+    global contador, estado
     
     
-    contador+1
+    contador+=1
     
     if estado == 'Jogando' and contador % 60 == 0:
         mover_fantasmas()
+        
+    if estado == 'Jogando':
+        checar_colisao_fantasma()
+    if len(moedas) == 0:
+        estado = 'Vitoria'
     
         
     glutPostRedisplay()
     glutTimerFunc(16, timer, 0)
     
 def teclado(key, x, y):
-    global estado
+    global estado, vidas, pontos
     if estado == 'Inicio':
         if key == b'\r':
             estado = 'Jogando'
     elif estado == 'Jogando':
         if key == b'p':
             estado = 'Pause'
-        if key == b'g':
-            estado = 'GameOver'
+        
     elif estado == 'Pause':
         if key == b'\r':
             estado = 'Jogando'
     elif estado == 'GameOver':
         if key == b'r':
             estado = 'Inicio'
+            vidas = 3
+            pontos = 0
+            carregar_mapa()
+            print("reset:", vidas, pontos, len(moedas))
+    elif estado == 'Vitoria':
+        if key == b'r':
+            estado = 'Inicio'
+            vidas = 3
+            pontos = 0
+            carregar_mapa()
+            
     if key == b'\x1b':
         glutLeaveMainLoop()
         
         
 def teclas_especiais(key, x, y):
-    global jogador
+    global jogador, pontos, inicio_jogador
 
     if estado == 'Jogando':
 
         jx, jy = jogador
+        
+        inicio_jogador = (jx, jy)
 
         nx, ny = jx, jy
 
@@ -216,6 +270,12 @@ def teclas_especiais(key, x, y):
 
         if mapa[ny][nx] != '#':
             jogador = (nx, ny)
+        
+        if (nx,ny) in moedas:
+            moedas.remove((nx,ny))
+            pontos = pontos + 10
+            print(pontos)
+            
     
 
     
