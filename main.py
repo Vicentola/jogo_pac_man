@@ -49,6 +49,7 @@ def draw():
     
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
+    
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
@@ -117,8 +118,27 @@ def draw():
             glPopMatrix()
         
         
-        
+    if estado == 'Inicio':
+        desenhar_texto(300, 300, "PAC-MAN")
+        desenhar_texto(250, 260, "APERTE ENTER PARA JOGAR")
 
+    elif estado == 'Jogando':
+        desenhar_texto(10, 570, f"Pontos: {pontos}")
+        desenhar_texto(10, 540, f"Vidas: {vidas}")
+
+    elif estado == 'Pause':
+        desenhar_texto(300, 320, "PAUSE")
+        desenhar_texto(230, 280, "APERTE ENTER PARA CONTINUAR")
+
+    elif estado == 'GameOver':
+        desenhar_texto(280, 340, "GAME OVER")
+        desenhar_texto(280, 300, f"Pontos: {pontos}")
+        desenhar_texto(230, 260, "APERTE R PARA RECOMECAR")
+
+    elif estado == 'Vitoria':
+        desenhar_texto(280, 340, "VOCE VENCEU!")
+        desenhar_texto(280, 300, f"Pontos: {pontos}")
+        desenhar_texto(280, 260, "APERTE R")
     
     glutSwapBuffers() # importante para doubl;e buffering
     
@@ -208,8 +228,8 @@ def timer(valor):
         
     if estado == 'Jogando':
         checar_colisao_fantasma()
-    if len(moedas) == 0:
-        estado = 'Vitoria'
+        if len(moedas) == 0:
+            estado = 'Vitoria'
     
         
     glutPostRedisplay()
@@ -246,13 +266,13 @@ def teclado(key, x, y):
         
         
 def teclas_especiais(key, x, y):
-    global jogador, pontos, inicio_jogador
+    global jogador, pontos
 
     if estado == 'Jogando':
 
         jx, jy = jogador
         
-        inicio_jogador = (jx, jy)
+        
 
         nx, ny = jx, jy
 
@@ -275,9 +295,34 @@ def teclas_especiais(key, x, y):
             moedas.remove((nx,ny))
             pontos = pontos + 10
             print(pontos)
-            
-    
 
+
+def desenhar_texto(x,y, texto):
+    glDisable(GL_DEPTH_TEST)
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    gluOrtho2D(0, width, 0, height)
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+    
+    glColor(1, 1, 1)
+    glRasterPos2f(x, y)
+    
+    for letra in texto:
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ord(letra))
+        
+    glPopMatrix()
+        
+    glMatrixMode(GL_PROJECTION)
+        
+    glPopMatrix()
+        
+    glMatrixMode(GL_MODELVIEW)
+    
+    glEnable(GL_DEPTH_TEST)
+        
     
     
 glutInit() 
