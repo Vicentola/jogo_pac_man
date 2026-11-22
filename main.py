@@ -3,6 +3,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import * 
 
 import random
+from PIL import Image
 
 width, height = 800, 600
 
@@ -22,13 +23,16 @@ vidas  = 3
 DIRECOES = [(1,0), (-1,0), (0,1), (0,-1)]
 
 def inicializar():
+    global textura_chao
     glEnable(GL_DEPTH_TEST) #teste de profundidade vendo quais objetos estao na frente e atraz
 
     glMatrixMode(GL_PROJECTION)#matriz de proporcao configura lente e camera
     glLoadIdentity() #rezeta a matriz pra n carregar funcoes anteriores
     gluPerspective(60, width / height, 0.1, 100)
 
-    glMatrixMode(GL_MODELVIEW)    
+    glMatrixMode(GL_MODELVIEW)   
+    
+    textura_chao = carregar_textura('chao.jpg')
 
 def draw():
     
@@ -60,7 +64,40 @@ def draw():
         )    
     
     if estado == 'Jogando' or estado == 'Pause':
-    
+        
+        glEnable(GL_TEXTURE_2D)    
+                
+        glBindTexture(GL_TEXTURE_2D, textura_chao)
+        
+        glColor3f(1, 1, 1)
+        
+        largura = len(mapa[0])
+        altura = len(mapa)
+        
+        glBegin(GL_QUADS)   
+        
+        glNormal3f(0, 1, 0)
+        
+        # Canto 1
+        glTexCoord2f(0, 0)
+        glVertex3f(-0.5, -0.5, -0.5)
+        
+        # Canto 2
+        glTexCoord2f(largura, 0)
+        glVertex3f(largura - 0.5, -0.5, -0.5)
+        
+        # Canto 3
+        glTexCoord2f(largura, altura)
+        glVertex3f(largura - 0.5, -0.5, altura - 0.5)
+
+        # Canto 4
+        glTexCoord2f(0, altura)
+        glVertex3f(-0.5, -0.5, altura - 0.5)
+
+        glEnd()
+
+        glDisable(GL_TEXTURE_2D)
+        
         glColor3f(0, 0, 1)
     
         for y, linha in enumerate(mapa):
@@ -116,6 +153,8 @@ def draw():
             glutSolidSphere(0.1,10,10)
             
             glPopMatrix()
+            
+        
         
         
     if estado == 'Inicio':
@@ -322,7 +361,39 @@ def desenhar_texto(x,y, texto):
     glMatrixMode(GL_MODELVIEW)
     
     glEnable(GL_DEPTH_TEST)
-        
+    
+    glEnable(GL_LIGHTING)
+    
+    glEnable(GL_LIGHT0)  
+    
+    glEnable(GL_COLOR_MATERIAL)
+    
+def carregar_textura(nome_arquivo):
+    imagem = Image.open(nome_arquivo).convert('RGB')
+    dados = imagem.tobytes()
+    largura, altura = imagem.size
+    
+    rgb_textura = glGenTextures(1)
+    
+    glBindTexture(GL_TEXTURE_2D, rgb_textura)
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    
+    glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_T, GL_REPEAT)
+
+    glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_S, GL_REPEAT)
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, largura, altura, 0, GL_RGB, GL_UNSIGNED_BYTE, dados)
+    
+    return rgb_textura
+
+    
+   
+    
     
     
 glutInit() 
