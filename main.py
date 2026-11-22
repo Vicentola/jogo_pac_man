@@ -2,12 +2,18 @@ from OpenGL.GL import *
 from OpenGL.GLU import * 
 from OpenGL.GLUT import * 
 
+import random
+
 width, height = 800, 600
 
 
 estado = 'Inicio'
 
 jogador = None
+
+contador = 0
+
+DIRECOES = [(1,0), (-1,0), (0,1), (0,-1)]
 
 def inicializar():
     glEnable(GL_DEPTH_TEST) #teste de profundidade vendo quais objetos estao na frente e atraz
@@ -71,9 +77,64 @@ def draw():
         glutSolidSphere(0.4,20,20)
         
         glPopMatrix()
+        
+        
+        for fantasma in inimigos:
+            
+            glColor3f(1,0,0)
+            
+            fx = fantasma[0]
+            fy = fantasma[1]
+            
+            
+            glPushMatrix()
+            glTranslate(fx, 0, fy)
+            
+            glutSolidCube(0.7)
+            
+            glPopMatrix()
+        
+        
+        
 
     
     glutSwapBuffers() # importante para doubl;e buffering
+    
+    
+    
+def mover_fantasmas():
+
+    for fantasma in inimigos:
+        fx, fy, dx, dy = fantasma
+
+        possiveis = []
+
+        # Verificar todas as direções possíveis
+        for ndx, ndy in DIRECOES:
+            nx = fx + ndx
+            ny = fy + ndy
+
+            if mapa[ny][nx] != '#':
+                possiveis.append((ndx, ndy))
+
+        # Remover a direção de volta
+        sem_volta = [d for d in possiveis if d != (-dx, -dy)]
+
+        if sem_volta:
+            possiveis = sem_volta
+
+        # Sortear uma direção
+        if possiveis:
+            ndx, ndy = random.choice(possiveis)
+
+            # Atualizar direção
+            fantasma[2] = ndx
+            fantasma[3] = ndy
+
+            # Atualizar posição
+            fantasma[0] += ndx
+            fantasma[1] += ndy
+
     
 def carregar_mapa():
     global mapa, jogador, inimigos, moedas
@@ -91,13 +152,24 @@ def carregar_mapa():
                 if caractere == 'P':
                     jogador = (x,y)
                 elif caractere == 'E':
-                    inimigos.append((x,y))
+                    inimigos.append([x,y,1,0])
                 elif caractere == '.':
                     moedas.append((x,y))
                     
         print(jogador, len(inimigos), len(moedas))
+        print(inimigos)
     
 def timer(valor):
+    
+    global contador
+    
+    
+    contador+1
+    
+    if estado == 'Jogando' and contador % 60 == 0:
+        mover_fantasmas()
+    
+        
     glutPostRedisplay()
     glutTimerFunc(16, timer, 0)
     
