@@ -215,7 +215,38 @@ def draw():
             glPushMatrix()
             glTranslate(posicao_desenhadax, flutuar, posicao_desenhadaz)
 
-            glutSolidCube(0.7)
+            glutSolidSphere(0.35,20, 20)
+            glPushMatrix()
+            glRotate(90,1,0,0)
+            glutSolidCylinder(0.35,0.35,20,5)
+            glPopMatrix()
+
+
+            glColor3f(1,1,1)
+
+            glPushMatrix()
+            glTranslate(0.12,0.05,0.3)
+            glutSolidSphere(0.09,10,10)
+            glPopMatrix()
+
+
+            glPushMatrix()
+            glTranslate(-0.12,0.05,0.3)
+            glutSolidSphere(0.09,10,10)
+            glPopMatrix()
+
+            glColor3f(0,0,0)
+
+            glPushMatrix()
+            glTranslate(0.12,0.05,0.37)
+            glutSolidSphere(0.045,5,5)
+            glPopMatrix()
+
+            glPushMatrix()
+            glTranslate(-0.12,0.05,0.37)
+            glutSolidSphere(0.045,5,5)
+            glPopMatrix()
+
 
             glPopMatrix()
 
