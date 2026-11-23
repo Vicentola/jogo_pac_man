@@ -21,6 +21,9 @@ from OpenGL.GLUT import *
 
 import random
 from PIL import Image  # Pillow: usado só para ler o arquivo de imagem da textura
+import math 
+
+
 
 # Tamanho da janela em pixels
 width, height = 800, 600
@@ -201,9 +204,16 @@ def draw():
             fx = fantasma[0]
             fy = fantasma[1]
 
+            flutuar =  math.sin((contador * 0.1 + fantasma[0])) * 0.15
 
+            progresso = (contador % 60) / 60
+
+            posicao_desenhadax =  fx - fantasma[2] * (1 - progresso)
+
+            posicao_desenhadaz = fy - fantasma[3] *(1 - progresso)
+ 
             glPushMatrix()
-            glTranslate(fx, 0, fy)
+            glTranslate(posicao_desenhadax, flutuar, posicao_desenhadaz)
 
             glutSolidCube(0.7)
 
@@ -331,7 +341,7 @@ def carregar_mapa():
                     jogador = (x,y)
                     inicio_jogador = (x,y)
                 elif caractere == 'E':
-                    inimigos.append([x,y,1,0])  # [x, y, dx, dy]: começa indo para a direita
+                    inimigos.append([x,y,0,0])  # [x, y, dx, dy]: começa indo para a direita
                 elif caractere == '.':
                     moedas.append((x,y))
 
@@ -344,8 +354,8 @@ def timer(valor):
 
     global contador, estado
 
-
-    contador+=1
+    if estado == 'Jogando':
+        contador += 1 
 
     # Freio dos fantasmas: só andam a cada 60 toques (~1 passo por segundo).
     # Fora do estado 'Jogando' nada se move: é assim que o pause funciona.
