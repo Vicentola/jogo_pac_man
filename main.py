@@ -52,6 +52,8 @@ vidas  = 3
 # Câmera atual: 'cima' (visão geral) ou 'seguir' (acompanha o Pac-Man)
 modo_camera = 'cima'
 
+direcao_pacman = 0
+
 # As 4 direções possíveis na grade, como (dx, dy): direita, esquerda, baixo, cima
 DIRECOES = [(1,0), (-1,0), (0,1), (0,-1)]
 
@@ -190,7 +192,14 @@ def draw():
 
         glTranslate(jx, 0, jy)
 
-        glutSolidSphere(0.4,20,20)  # raio 0.4 (menor que a casa) e resolução 20x20
+        boca = abs(math.sin(contador * 0.2)) * 40 #sinal absoluto 
+
+        ''''0.2 é o nhac-nhac, 40 abertura máxima da boca em gruas'''
+
+        glRotatef(direcao_pacman, 0, 1, 0)
+
+        desenhar_pacman(30)  # raio 0.4 (menor que a casa) e resolução 20x20
+        desenhar_pacman(boca)
 
         glPopMatrix()
 
@@ -215,6 +224,21 @@ def draw():
             glPushMatrix()
             glTranslate(posicao_desenhadax, flutuar, posicao_desenhadaz)
 
+
+            direcao = (fantasma[2], fantasma[3])
+
+            if direcao == (0,1):
+                glRotate(0,0,1,0)
+            
+            if direcao == (1,0):
+                glRotate(90,0,1,0)
+
+            if direcao == (0,-1):
+                glRotate(180,0,1,0)
+            
+            if direcao == (-1,0):
+                glRotate(270,0,1,0)
+
             glutSolidSphere(0.35,20, 20)
             glPushMatrix()
             glRotate(90,1,0,0)
@@ -238,7 +262,7 @@ def draw():
             glColor3f(0,0,0)
 
             glPushMatrix()
-            glTranslate(0.12,0.05,0.37)
+            glTranslate(0.12,0.05,0.37) # lado altura frente
             glutSolidSphere(0.045,5,5)
             glPopMatrix()
 
@@ -295,6 +319,47 @@ def draw():
     # Double buffering: desenhamos no buffer de trás e trocamos com o da frente,
     # assim a tela nunca mostra o desenho pela metade (sem piscar)
     glutSwapBuffers()
+
+
+def desenhar_pacman(abertura):
+
+    for i in range(0,20):
+        h_borda_de_baixo = -90 + i * 9
+        h_do_teto = -90 + (i + 1) * 9 # 180 / 20 = 9     
+        glBegin(GL_QUAD_STRIP)
+        for j in range(0,21):
+            
+            volta = abertura + j *(360 - 2 * abertura) / 20
+            volta_rad = math.radians(volta)
+
+            h_borda_de_baixo_rad = math.radians(h_borda_de_baixo)
+            x = math.cos(h_borda_de_baixo_rad) * math.cos(volta_rad)
+                
+            y = math.sin(h_borda_de_baixo_rad)
+    
+            z = math.cos(h_borda_de_baixo_rad) * math.sin(volta_rad)            
+
+            glNormal3f(x,y,z)
+
+            glVertex3f(x * 0.4, y * 0.4, z * 0.4)
+
+            h_do_teto_rad = math.radians(h_do_teto)
+            x = math.cos(h_do_teto_rad) * math.cos(volta_rad)
+
+            y = math.sin(h_do_teto_rad)
+
+            z = math.cos(h_do_teto_rad) * math.sin(volta_rad)
+
+            glNormal3f(x,y,z)
+            glVertex3f(x * 0.4, y * 0.4, z * 0.4)
+
+
+
+        glEnd()
+            
+
+        
+
 
 
 
@@ -449,7 +514,7 @@ def teclado(key, x, y):
 def teclas_especiais(key, x, y):
     """Callback das setas (teclas especiais não passam pelo glutKeyboardFunc).
     Colisão com o cenário: antes de andar, testa se a casa de destino é parede."""
-    global jogador, pontos
+    global jogador, pontos, direcao_pacman
 
     if estado == 'Jogando':
 
@@ -463,15 +528,19 @@ def teclas_especiais(key, x, y):
         # no arquivo a linha 0 é o topo, então subir é diminuir o y
         if key == GLUT_KEY_UP:
             ny -= 1
+            direcao_pacman = 90
 
         if key == GLUT_KEY_DOWN:
             ny += 1
+            direcao_pacman = 270
 
         if key == GLUT_KEY_LEFT:
             nx -= 1
+            direcao_pacman = 180
 
         if key == GLUT_KEY_RIGHT:
             nx += 1
+            direcao_pacman = 0
 
         # mapa[linha][coluna] -> y primeiro, depois x
         if mapa[ny][nx] != '#':
